@@ -1,6 +1,7 @@
 const dotenv = require('dotenv')
 const TelegramBot = require('node-telegram-bot-api')
 
+const Currency = require('./currency')
 const SentryPharmacy = require('./sentry-pharmacy')
 dotenv.config()
 
@@ -19,7 +20,7 @@ bot.onText(/\/secenek/, (msg) => {
 bot.onText(/\/doviz/, (msg) => {
   const chatId = msg.chat.id
   const message = 1+2
-  
+  Currency.fetchData()
   bot.sendMessage(chatId, message)
 })
 
@@ -27,7 +28,14 @@ bot.onText(/\/eczane (.+)/, async (msg, match) => {
   const chatId = msg.chat.id
   const provinceAndDistrict = match[1]
 
-  const pharmacies = await SentryPharmacy.fetchData(provinceAndDistrict)
+  console.log(provinceAndDistrict)
+  if (!isThereADistrict(provinceAndDistrict)) {
+    bot.sendMessage(chatId, 'Eksik veri girişi')
+    return
+  }
+
+
+  const pharmacies = await SentryPharmacy.fetchData(provinceAndDistrict.toLowerCase())
 
   if (checkKey(pharmacies, 'status')) {
     if (!pharmacies.status) {
@@ -35,7 +43,14 @@ bot.onText(/\/eczane (.+)/, async (msg, match) => {
       return
     } 
   }
-  sendMessage(chatId, pharmacies)
+
+  try {
+    sendMessage(chatId, pharmacies)
+  } catch (error) {
+    console.log(error)
+    sendMessage(chatId, 'Bir şeyler ters gitti, tekrar deneyin.')
+
+  }
   
 })
 
@@ -49,4 +64,12 @@ sendMessage = (chatId, pharmacies) => {
 
 checkKey = (obj, key) => {
   return obj.hasOwnProperty(key)
+}
+
+isThereADistrict = (provinceAndDistrict) => {
+  const array = provinceAndDistrict.split('-')
+  if (array.lenght == 0 || array.lenght == 1) {
+    return false
+  }
+  return true
 }
