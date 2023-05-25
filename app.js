@@ -1,14 +1,17 @@
+const dotenv = require('dotenv')
 const TelegramBot = require('node-telegram-bot-api')
 
 const SentryPharmacy = require('./sentry-pharmacy')
+dotenv.config()
 
-const token = '6007111692:AAFgT0o3XfkSsacK0HEAiaRWnB0_y-WNd7M'
-
-const bot = new TelegramBot(token, { polling: true })
+const API_TOKEN = process.env.API_TOKEN
+const bot = new TelegramBot(API_TOKEN, { polling: true })
 
 bot.onText(/\/secenek/, (msg) => {
   const chatId = msg.chat.id
-  const message = '/doviz \n Döviz kurları hakkında bilgi \n\n /eczane il-ilçe \n Girilen bölgedeki nöbetçi eczaneler'
+  const message = ' Kullanabileceğiniz komutlar ve kullanım şekilleri aşağıdaki gibidir.\n\n'
+                  + '/doviz \n Döviz kurları hakkında bilgi \n\n /eczane il-ilçe \n'
+                  + ' Girilen bölgedeki nöbetçi eczaneler'
   
   bot.sendMessage(chatId, message)
 })
