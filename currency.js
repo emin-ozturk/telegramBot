@@ -1,7 +1,7 @@
 const axios = require('axios')
 const cheerio = require('cheerio')
 
-async function fetchData(provinceAndDistrict) {
+async function fetchData() {
     try {
       const response = await axios.get('https://www.doviz.com/', {
         headers: {
@@ -12,21 +12,25 @@ async function fetchData(provinceAndDistrict) {
         const html = response.data
   
         const $ = cheerio.load(html)
-        const EUR_USD = $('[data-socket-key="gram-altin"]')
+        const GRAMALTIN = $('[data-socket-key="gram-altin"]')
+        const USD = $('[data-socket-key="USD"]')
+        const EUR = $('[data-socket-key="EUR"]')
+        const STERLIN = $('[data-socket-key="GBP"]')
+        const BIST100 = $('[data-socket-key="XU100"]')
+        const BITCOIN = $('[data-socket-key="bitcoin"]')
+        const GRAMGUMUS = $('[data-socket-key="gumus"]')
+        const BRENT = $('[data-socket-key="BRENT"]')
 
-        console.log(EUR_USD)
-      
-      
-      const pharmacies = []
-      EUR_USD.each((index, element) => {
-        pharmacies.push({
-          'EUR_USD': $(EUR_USD[index]).html(),
-  
-        })
-        console.log($(EUR_USD[index]).html())
-      })
-  
-    //   return pharmacies 
+        return {
+          'GRAMALTIN': $(GRAMALTIN[0]).html(),
+          'USD': $(USD[0]).html(),
+          'EUR': $(EUR[0]).html(),
+          'STERLIN': $(STERLIN[0]).html(),
+          'BIST100': $(BIST100[0]).html(),
+          'BITCOIN': $(BITCOIN[0]).html(),
+          'GRAMGUMUS': $(GRAMGUMUS[0]).html(),
+          'BRENT': $(BRENT[0]).html()
+        }
       
     } catch (error) {
       console.error('Veri alınamadı:', error)

@@ -17,10 +17,17 @@ bot.onText(/\/secenek/, (msg) => {
   bot.sendMessage(chatId, message)
 })
 
-bot.onText(/\/doviz/, (msg) => {
+bot.onText(/\/doviz/, async (msg) => {
   const chatId = msg.chat.id
-  const message = 1+2
-  Currency.fetchData()
+  const currency = await Currency.fetchData()
+  var message = 'GRAM ALTIN: ' + currency.GRAMALTIN + '\n' +
+                'DOLAR: ' + currency.USD + '\n' +
+                'EURO: ' + currency.EUR + '\n' +
+                'STERLIN: ' + currency.STERLIN + '\n' +
+                'BIST100: ' + currency.BIST100 + '\n' +
+                'BITCOIN: '+ currency.BITCOIN + '\n' +
+                'GRAM GÜMÜS: '+ currency.GRAMGUMUS + '\n' +
+                'BRENT: '+ currency.BRENT
   bot.sendMessage(chatId, message)
 })
 
@@ -28,12 +35,10 @@ bot.onText(/\/eczane (.+)/, async (msg, match) => {
   const chatId = msg.chat.id
   const provinceAndDistrict = match[1]
 
-  console.log(provinceAndDistrict)
   if (!isThereADistrict(provinceAndDistrict)) {
     bot.sendMessage(chatId, 'Eksik veri girişi')
     return
   }
-
 
   const pharmacies = await SentryPharmacy.fetchData(provinceAndDistrict.toLowerCase())
 
@@ -49,9 +54,7 @@ bot.onText(/\/eczane (.+)/, async (msg, match) => {
   } catch (error) {
     console.log(error)
     sendMessage(chatId, 'Bir şeyler ters gitti, tekrar deneyin.')
-
   }
-  
 })
 
 sendMessage = (chatId, pharmacies) => {
