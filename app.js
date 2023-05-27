@@ -1,23 +1,17 @@
 const dotenv = require('dotenv')
 const TelegramBot = require('node-telegram-bot-api')
-
 const Currency = require('./currency')
 const SentryPharmacy = require('./sentry-pharmacy')
-dotenv.config()
 
+dotenv.config()
 const API_TOKEN = process.env.API_TOKEN
 const bot = new TelegramBot(API_TOKEN, { polling: true })
-
-bot.onText(/\/secenek/, (msg) => {
-  const chatId = msg.chat.id
-  const message = ' Kullanabileceğiniz komutlar ve kullanım şekilleri aşağıdaki gibidir.\n\n'
-                  + '/doviz \n Döviz kurları hakkında bilgi \n\n /eczane il-ilçe \n'
-                  + ' Girilen bölgedeki nöbetçi eczaneler'
-  
-  bot.sendMessage(chatId, message)
-})
+var STATUS = null
+const STATUS_CURRENCY = 0, STATUS_SENTRY_PHARMACY = 1
+const commands = ['/doviz', '/eczane']
 
 bot.onText(/\/doviz/, async (msg) => {
+  STATUS = STATUS_CURRENCY
   const chatId = msg.chat.id
   const currency = await Currency.fetchData()
   var message = 'GRAM ALTIN: ' + currency.GRAMALTIN + '\n' +
@@ -31,48 +25,51 @@ bot.onText(/\/doviz/, async (msg) => {
   bot.sendMessage(chatId, message)
 })
 
-bot.onText(/\/eczane (.+)/, async (msg, match) => {
+bot.onText(/\/eczane/, async (msg, match) => {
+  STATUS = STATUS_SENTRY_PHARMACY
   const chatId = msg.chat.id
-  const provinceAndDistrict = match[1]
+  bot.sendMessage(chatId, 'Arasında - işareti olacak şekilde il-ilçe adı girin.')
 
-  if (!isThereADistrict(provinceAndDistrict)) {
-    bot.sendMessage(chatId, 'Eksik veri girişi')
+})
+
+bot.on('message', async (msg) => {
+  const chatId = msg.chat.id
+  const message = msg.text
+
+  if (isCommand(message)) {
     return
   }
 
-  const pharmacies = await SentryPharmacy.fetchData(provinceAndDistrict.toLowerCase())
+  switch (STATUS) {
+    case STATUS_SENTRY_PHARMACY:
+      const response  = await SentryPharmacy.getSentryPharmacy(message)
+      if (checkKey(response, 'status')) {
+        if (!response.status) {
+          bot.sendMessage(chatId, response.message)
+          return
+        } 
+      }
+      sendSentryPharmacy(chatId, response)
+      break
 
-  if (checkKey(pharmacies, 'status')) {
-    if (!pharmacies.status) {
-      bot.sendMessage(chatId, pharmacies.message)
-      return
-    } 
+    case STATUS_CURRENCY:
+      break
   }
 
-  try {
-    sendMessage(chatId, pharmacies)
-  } catch (error) {
-    console.log(error)
-    sendMessage(chatId, 'Bir şeyler ters gitti, tekrar deneyin.')
-  }
 })
 
-sendMessage = (chatId, pharmacies) => {
-  var message = ''
-  pharmacies.forEach(pharmacy => {
-    message += pharmacy.name + '\n' + pharmacy.tel + '\n' + pharmacy.address + '\n\n'
-  })
-  bot.sendMessage(chatId, message)
+isCommand = (message) => {
+  return commands.find(command => command === message)
 }
 
 checkKey = (obj, key) => {
   return obj.hasOwnProperty(key)
 }
 
-isThereADistrict = (provinceAndDistrict) => {
-  const array = provinceAndDistrict.split('-')
-  if (array.lenght == 0 || array.lenght == 1) {
-    return false
-  }
-  return true
+sendSentryPharmacy = (chatId, pharmacies) => {
+  var message = ''
+  pharmacies.forEach(pharmacy => {
+    message += pharmacy.name + '\n' + pharmacy.tel + '\n' + pharmacy.address + '\n\n'
+  })
+  bot.sendMessage(chatId, message)
 }

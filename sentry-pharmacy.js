@@ -3,7 +3,29 @@ const cheerio = require('cheerio')
 
 const Translation = require('./translation')
 
-async function fetchData(provinceAndDistrict) {
+async function getSentryPharmacy(provinceAndDistrict) {
+
+  if (!isThereADistrict(provinceAndDistrict)) {
+    return {
+      status: false,
+      message: 'Eksik veri girişi'
+    }
+  }
+
+  const pharmacies = await fetchData(provinceAndDistrict.toLowerCase())
+
+  try {
+    return pharmacies
+  } catch (error) {
+    console.log(error)
+    return {
+      status: false,
+      message: 'Bir şeyler ters gitti, tekrar deneyin.'
+    }
+  }
+}
+
+fetchData = async (provinceAndDistrict) => {
   try {
     const response = await axios.get
       ('https://www.eczaneler.gen.tr/nobetci-' + 
@@ -30,7 +52,6 @@ async function fetchData(provinceAndDistrict) {
         'name': $(element).html(),
         'tel': $(tel[index]).html(),
         'address': $(address[index]).text().trim()
-
       })
     })
 
@@ -38,14 +59,22 @@ async function fetchData(provinceAndDistrict) {
     
   } catch (error) {
     console.error('Veri alınamadı:', error)
-    return ({
-      'status': false,
-      'message': 'Hatalı veri girişi'
-    })
+    return {
+      status: false,
+      message: 'Sonuç bulunamadı'
+    }
   }
 }
 
+isThereADistrict = (provinceAndDistrict) => {
+  const array = provinceAndDistrict.split('-')
+  if (array.lenght == 0 || array.lenght == 1) {
+    return false
+  }
+  return true
+}
+
 module.exports = {
-  fetchData
+  getSentryPharmacy
 }
 
