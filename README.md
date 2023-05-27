@@ -4,7 +4,7 @@ Bilgi vermek amaçlı geliştirilmiş Telegram botu
 
 NASIL ÇALIŞIR
 
-Bot içerisinde 3 adet komut bulunmaktadır. Kullanım şekilleri ve açıklamaları şu şekildedir. 
+Bot içerisinde 2 adet komut bulunmaktadır. Kullanım şekilleri ve açıklamaları şu şekildedir. 
 
 1. Komut 
 
@@ -14,12 +14,6 @@ Güncel döviz kuru bilgilerini gösterir
   
 2. Komut
 
-/eczane il-ilçe
+/eczane
 
-İl ve ilçe ismini komutla birlikte belirttiğinizde, o günün nöbetçi eczanelerinin bilgileri listelenir. İl ve ilçe arasına - işareti konulmalıdır. Tüm harfler küçük olmalıdır
-
-3. Komut
-
-/secenek
-
-Bot içerisinde kullanılan komutlar hakkında bilgi verir
+İl ve ilçe ismine göre günün nöbetçi eczanelerinin bilgileri listelenir. İl ve ilçe arasına - işareti konulmalıdır. Tüm harfler küçük olmalıdır
