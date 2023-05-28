@@ -2,7 +2,14 @@ const dotenv = require('dotenv')
 const TelegramBot = require('node-telegram-bot-api')
 const Currency = require('./currency')
 const SentryPharmacy = require('./sentry-pharmacy')
+const express = require('express')
 
+app = express()
+
+
+app.get('/', (req, res) => {
+  res.send('Başladı')
+})
 dotenv.config()
 const API_TOKEN = process.env.API_TOKEN
 const bot = new TelegramBot(API_TOKEN, { polling: true })
@@ -73,3 +80,7 @@ sendSentryPharmacy = (chatId, pharmacies) => {
   })
   bot.sendMessage(chatId, message)
 }
+
+app.listen(process.env.PORT || 3000, () => {
+  console.log('Server başladı')
+})
